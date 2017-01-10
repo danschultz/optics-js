@@ -1,8 +1,14 @@
 import {F1} from "./transformation";
 import {Option} from "./option";
+import {Traversal, Monoid} from "./traversal";
 
 export class Prism<S, A> {
   constructor(private _getOption: F1<S, Option<A>>, private _reverseGet: F1<A, S>) {}
+
+  public compose<B>(other: Prism<A, B>): Prism<S, B>;
+  public compose(other: any): any {
+    
+  }
 
   public getOption(obj: S): Option<A> {
     return this._getOption(obj);
@@ -34,9 +40,29 @@ export class Prism<S, A> {
     return this.modify(() => value);
   }
 
-  public then<B>(other: Prism<A, B>): Prism<S, B> {
-    return new Prism<S, B>(
-        (obj) => this.getOption(obj).flatMap(value => other.getOption(value)),
-        (value) => this.reverseGet(other.reverseGet(value)));
+  public asTraversal(): Traversal<S, A> {
+    return new PrismTraversal(this);
+  }
+}
+
+class PrismTraversal<S, A> extends Traversal<S, A> {
+  constructor(private prism: Prism<S, A>) {
+    super();
+  }
+
+  public foldMap<R>(monoid: Monoid<R, R>, f: F1<A, R>, empty: R): F1<S, R> {
+    return s => this.prism.getOption(s).fold(() => empty, (a) => f(a));
+  }
+
+  public modify(f: F1<A, A>): F1<S, S> {
+    return this.prism.modify(f);
+  }
+
+  public modifyOption(f: F1<A, Option<A>>): F1<S, Option<S>> {
+    return s => {
+      return this.prism
+        .getOption(s)
+        .flatMap(a => f(a)).map(a => this.prism.set(a)(s));
+    };
   }
 }

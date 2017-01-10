@@ -12,11 +12,30 @@ export class Lens<S, A> {
     this.setter = setter;
   }
 
-  public composeOptional<B>(other: Optional<A, B>): Optional<S, B> {
+  public compose<B>(lens: Lens<A, B>): Lens<S, B>;
+  public compose<B>(optional: Optional<A, B>): Optional<S, B>;
+  public compose<B>(traversal: Traversal<A, B>): Traversal<S, B>;
+  public compose(other: any): any {
+    if (other instanceof Lens) {
+      return this.composeLens(other);
+    } else if (other instanceof Optional) {
+      return this.composeOptional(other);
+    } else if (other instanceof Traversal) {
+      return this.composeTraversal(other);
+    } else {
+      throw new TypeError(`Cannot compose ${other.constructor.name} with type Lens`);
+    }
+  }
+
+  private composeLens<B>(lens: Lens<A, B>): Lens<S, B> {
+    return new ComposedLens(this, lens);
+  }
+
+  private composeOptional<B>(other: Optional<A, B>): Optional<S, B> {
     return this.asOptional().composeOptional(other);
   }
 
-  public composeTraversal<B>(other: Traversal<A, B>): Traversal<S, B> {
+  private composeTraversal<B>(other: Traversal<A, B>): Traversal<S, B> {
     return this.asTraversal().composeTraversal(other);
   }
 
@@ -32,10 +51,6 @@ export class Lens<S, A> {
     return obj => this.setter(obj, value);
   }
 
-  public then<B>(lens: Lens<A, B>): Lens<S, B> {
-    return compose(this, lens);
-  }
-
   public view(obj: S): A {
     return this.getter(obj);
   }
@@ -49,22 +64,13 @@ export class Lens<S, A> {
   }
 }
 
-// Dan: Making this private for now, since you can compose lenses using Lens.then()
-function compose<A, B, C>(a: Lens<A, B>, b: Lens<B, C>): Lens<A, C>;
-function compose(...lenses: Lens<any, any>[]): Lens<any, any> {
-  return lenses.reduce((accumulated, lens) => {
-    return new Lens(
-        (obj) => {
-          const nextObj = accumulated.view(obj);
-          return lens.view(nextObj);
-        },
-        (obj, value) => {
-          const parent = accumulated.view(obj);
-          const newParent = lens.set(value)(parent);
-          return accumulated.set(newParent)(obj);
-        }
+class ComposedLens<S, A, B> extends Lens<S, B> {
+  constructor(a: Lens<S, A>, b: Lens<A, B>) {
+    super(
+        (obj) => b.view(a.view(obj)),
+        (obj, value) => a.set(b.set(value)(a.view(obj)))(obj)
     );
-  });
+  }
 }
 
 class LensTraversal<S, A> extends Traversal<S, A> {

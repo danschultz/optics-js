@@ -6,8 +6,8 @@ import {Option} from "../src/optics/option";
 
 describe("Lens", () => {
   const historyDepartment = key<string, Department>("History");
-  const historyLecturers = historyDepartment.then(lecturers);
-  const firstHistoryLecturer = departments.then(historyLecturers.then(head<Lecturer>()));
+  const historyLecturers = historyDepartment.compose(lecturers);
+  const firstHistoryLecturer = departments.compose(historyLecturers.compose(head<Lecturer>()));
 
   describe("get()", () => {
     it("returns the value of the object", () => {

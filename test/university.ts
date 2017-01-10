@@ -32,7 +32,7 @@ export const name = prop<University, string>("name");
 export const departments = prop<University, Map<string, Department>>("departments");
 export const lecturers = prop<Department, List<Lecturer>>("lecturers");
 
-export const allDepartments = departments.composeTraversal(new MapTraversal<string, Department>());
+export const allDepartments = departments.compose(new MapTraversal<string, Department>());
 
 export const firstName = prop<Lecturer, string>("firstName");
 export const lastName = prop<Lecturer, string>("lastName");

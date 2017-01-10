@@ -91,8 +91,8 @@ describe("Prism", () => {
     });
   });
 
-  describe("then()", () => {
-    const numbersAsStrings = numberCons.then(numbersToString);
+  describe("composeLens()", () => {
+    const numbersAsStrings = numberCons.compose(numbersToString);
 
     describe("getOption()", () => {
       it("should transform S => B", () => {

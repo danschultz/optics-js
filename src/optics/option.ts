@@ -76,7 +76,7 @@ export abstract class Option<A> {
   public abstract get isPresent(): boolean;
 }
 
-class Some<A> extends Option<A> {
+export class Some<A> extends Option<A> {
   constructor(private value: A) {
     super();
   }
@@ -102,7 +102,7 @@ class Some<A> extends Option<A> {
   }
 }
 
-class None<A> extends Option<A> {
+export class None<A> extends Option<A> {
   public get(): A {
     throw new TypeError("Attempt to access value of None");
   }

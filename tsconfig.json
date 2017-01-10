@@ -3,9 +3,12 @@
     "target": "es5",
     "module": "commonjs",
     "strictNullChecks": true,
+    "sourceMap": true,
+    "outDir": "build",
     "lib": ["es6"]
   },
   "exclude": [
     "node_modules"
-  ]
+  ],
+  "compileOnSave": true
 }

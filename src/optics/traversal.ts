@@ -3,6 +3,7 @@ import {Option} from "./option";
 import {List, Map} from "immutable";
 import {Lens} from "./lens";
 import {Optional} from "./optional";
+import {Prism} from "./prism";
 
 export type Monoid<A, R> = (accum: R, next: A) => R;
 
@@ -17,6 +18,10 @@ export abstract class Traversal<S, A> {
 
   public composeOptional<B>(optional: Optional<A, B>): Traversal<S, B> {
     return this.composeTraversal(optional.asTraversal());
+  }
+
+  public composePrism<B>(prism: Prism<A, B>): Traversal<S, B> {
+    return this.composeTraversal(prism.asTraversal());
   }
 
   public composeTraversal<B>(other: Traversal<A, B>): Traversal<S, B> {

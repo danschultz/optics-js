@@ -61,3 +61,18 @@ class OptionalTraversal<S, A> extends Traversal<S, A> {
     return this.optional.modifyOption(f);
   }
 }
+
+export class BlockOptional<S, A> extends Optional<S, A> {
+  // TODO(dan): _getOrModify should really return an Either
+  constructor(private _getOrModify: F1<S, Option<A>>, private _set: F1<A, F1<S, S>>) {
+    super();
+  }
+
+  public set(a: A): F1<S, S> {
+    return this._set(a);
+  }
+
+  public viewOption(obj: S): Option<A> {
+    return this._getOrModify(obj);
+  }
+}
